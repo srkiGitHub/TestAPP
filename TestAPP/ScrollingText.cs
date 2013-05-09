@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Data;
 using System.Windows.Forms;
 
 namespace TestAPP
@@ -12,43 +9,47 @@ namespace TestAPP
     /// Summary description for ScrollingTextControl.
     /// </summary>
     [
-    ToolboxBitmapAttribute(typeof(TestAPP.ScrollingText), "ScrollingText.bmp"),
+    ToolboxBitmapAttribute(typeof(ScrollingText), name: "ScrollingText.bmp"),
     DefaultEvent("TextClicked")
     ]
-    public class ScrollingText : System.Windows.Forms.Control
+    public class ScrollingText : Control
     {
-        private Timer timer;							// Timer for text animation.
-        private string text = "Text";					// Scrolling text
-        private float staticTextPos = 0;				// The running x pos of the text
-        private float yPos = 0;							// The running y pos of the text
-        private ScrollDirection scrollDirection = ScrollDirection.RightToLeft;				// The direction the text will scroll
-        private ScrollDirection currentDirection = ScrollDirection.LeftToRight;				// Used for text bouncing 
-        private VerticleTextPosition verticleTextPosition = VerticleTextPosition.Center;	// Where will the text be vertically placed
-        private int scrollPixelDistance = 2;			// How far the text scrolls per timer event
-        private bool showBorder = true;					// Show a border or not
-        private bool stopScrollOnMouseOver = false;		// Flag to stop the scroll if the user mouses over the text
-        private bool scrollOn = true;					// Internal flag to stop / start the scrolling of the text
-        private Brush foregroundBrush = null;			// Allow the user to set a custom Brush to the text Font
-        private Brush backgroundBrush = null;			// Allow the user to set a custom Brush to the background
-        private Color borderColor = Color.Black;		// Allow the user to set the color of the control border
-        private RectangleF lastKnownRect;				// The last known position of the text
+        private readonly Timer _timer;							// Timer for text animation.
+        private string _text = "Text";					// Scrolling text
+        private float _staticTextPos;				// The running x pos of the text
+        private float _yPos;							// The running y pos of the text
+        private ScrollDirection _scrollDirection = ScrollDirection.RightToLeft;				// The direction the text will scroll
+        private ScrollDirection _currentDirection = ScrollDirection.LeftToRight;				// Used for text bouncing 
+        private VerticleTextPosition _verticleTextPosition = VerticleTextPosition.Center;	// Where will the text be vertically placed
+        private int _scrollPixelDistance = 2;			// How far the text scrolls per timer event
+        private bool _showBorder = true;					// Show a border or not
+        private bool _stopScrollOnMouseOver;		// Flag to stop the scroll if the user mouses over the text
+        private bool _scrollOn = true;					// Internal flag to stop / start the scrolling of the text
+        private Brush _foregroundBrush;			// Allow the user to set a custom Brush to the text Font
+        private Brush _backgroundBrush;			// Allow the user to set a custom Brush to the background
+        private Color _borderColor = Color.Black;		// Allow the user to set the color of the control border
+        private RectangleF _lastKnownRect;				// The last known position of the text
 
         public ScrollingText()
         {
             // Setup default properties for ScrollingText control
             InitializeComponent();
 
+            _staticTextPos = 0;
+            _yPos = 0;
+            _stopScrollOnMouseOver = false;
+            _foregroundBrush = null;
+            _backgroundBrush = null;
+
             //This turns off internal double buffering of all custom GDI+ drawing
-            this.SetStyle(ControlStyles.DoubleBuffer, true);
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            this.SetStyle(ControlStyles.UserPaint, true);
-            this.SetStyle(ControlStyles.ResizeRedraw, true);
+            SetStyle(ControlStyles.DoubleBuffer, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.ResizeRedraw, true);
 
             //setup the timer object
-            timer = new Timer();
-            timer.Interval = 25;	//default timer interval
-            timer.Enabled = true;
-            timer.Tick += new EventHandler(Tick);
+            _timer = new Timer {Interval = 25, Enabled = true};
+            _timer.Tick += Tick;
         }
 
         /// <summary>
@@ -59,16 +60,16 @@ namespace TestAPP
             if (disposing)
             {
                 //Make sure our brushes are cleaned up
-                if (foregroundBrush != null)
-                    foregroundBrush.Dispose();
+                if (_foregroundBrush != null)
+                    _foregroundBrush.Dispose();
 
                 //Make sure our brushes are cleaned up
-                if (backgroundBrush != null)
-                    backgroundBrush.Dispose();
+                if (_backgroundBrush != null)
+                    _backgroundBrush.Dispose();
 
                 //Make sure our timer is cleaned up
-                if (timer != null)
-                    timer.Dispose();
+                if (_timer != null)
+                    _timer.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -93,10 +94,10 @@ namespace TestAPP
             //update rectangle to include where to paint for new position			
             //lastKnownRect.X -= 10;
             //lastKnownRect.Width += 20;			
-            lastKnownRect.Inflate(10, 5);
+            _lastKnownRect.Inflate(10, 5);
 
             //create region based on updated rectangle
-            Region updateRegion = new Region(lastKnownRect);
+            var updateRegion = new Region(_lastKnownRect);
 
             //repaint the control			
             Invalidate(updateRegion);
@@ -119,85 +120,87 @@ namespace TestAPP
         public void DrawScrollingText(Graphics canvas)
         {
             //measure the size of the string for placement calculation
-            SizeF stringSize = canvas.MeasureString(this.text, this.Font);
+            SizeF stringSize = canvas.MeasureString(_text, Font);
 
             //Calculate the begining x position of where to paint the text
-            if (scrollOn)
+            if (_scrollOn)
             {
                 CalcTextPosition(stringSize);
             }
 
             //Clear the control with user set BackColor
-            if (backgroundBrush != null)
+            if (_backgroundBrush != null)
             {
-                canvas.FillRectangle(backgroundBrush, 0, 0, this.ClientSize.Width, this.ClientSize.Height);
+                canvas.FillRectangle(_backgroundBrush, 0, 0, ClientSize.Width, ClientSize.Height);
             }
             else
-                canvas.Clear(this.BackColor);
+                canvas.Clear(BackColor);
 
             // Draw the border
-            if (showBorder)
-                using (Pen borderPen = new Pen(borderColor))
-                    canvas.DrawRectangle(borderPen, 0, 0, this.ClientSize.Width - 1, this.ClientSize.Height - 1);
+            if (_showBorder)
+                using (var borderPen = new Pen(_borderColor))
+                    canvas.DrawRectangle(borderPen, 0, 0, ClientSize.Width - 1, ClientSize.Height - 1);
 
             // Draw the text string in the bitmap in memory
-            if (foregroundBrush == null)
+            if (_foregroundBrush == null)
             {
-                using (Brush tempForeBrush = new System.Drawing.SolidBrush(this.ForeColor))
-                    canvas.DrawString(this.text, this.Font, tempForeBrush, staticTextPos, yPos);
+                using (Brush tempForeBrush = new SolidBrush(ForeColor))
+                    canvas.DrawString(_text, Font, tempForeBrush, _staticTextPos, _yPos);
             }
             else
-                canvas.DrawString(this.text, this.Font, foregroundBrush, staticTextPos, yPos);
+                canvas.DrawString(_text, Font, _foregroundBrush, _staticTextPos, _yPos);
 
-            lastKnownRect = new RectangleF(staticTextPos, yPos, stringSize.Width, stringSize.Height);
-            EnableTextLink(lastKnownRect);
+            _lastKnownRect = new RectangleF(_staticTextPos, _yPos, stringSize.Width, stringSize.Height);
+            EnableTextLink(_lastKnownRect);
         }
 
         private void CalcTextPosition(SizeF stringSize)
         {
-            switch (scrollDirection)
+            switch (_scrollDirection)
             {
                 case ScrollDirection.RightToLeft:
-                    if (staticTextPos < (-1 * (stringSize.Width)))
-                        staticTextPos = this.ClientSize.Width - 1;
+                    if (_staticTextPos < (-1 * (stringSize.Width)))
+                        _staticTextPos = ClientSize.Width - 1;
                     else
-                        staticTextPos -= scrollPixelDistance;
+                        _staticTextPos -= _scrollPixelDistance;
                     break;
                 case ScrollDirection.LeftToRight:
-                    if (staticTextPos > this.ClientSize.Width)
-                        staticTextPos = -1 * stringSize.Width;
+                    if (_staticTextPos > ClientSize.Width)
+                        _staticTextPos = -1 * stringSize.Width;
                     else
-                        staticTextPos += scrollPixelDistance;
+                        _staticTextPos += _scrollPixelDistance;
                     break;
                 case ScrollDirection.Bouncing:
-                    if (currentDirection == ScrollDirection.RightToLeft)
+                    if (_currentDirection == ScrollDirection.RightToLeft)
                     {
-                        if (staticTextPos < 0)
-                            currentDirection = ScrollDirection.LeftToRight;
+                        if (_staticTextPos < 0)
+                            _currentDirection = ScrollDirection.LeftToRight;
                         else
-                            staticTextPos -= scrollPixelDistance;
+                            _staticTextPos -= _scrollPixelDistance;
                     }
-                    else if (currentDirection == ScrollDirection.LeftToRight)
+                    else if (_currentDirection == ScrollDirection.LeftToRight)
                     {
-                        if (staticTextPos > this.ClientSize.Width - stringSize.Width)
-                            currentDirection = ScrollDirection.RightToLeft;
+                        if (_staticTextPos > ClientSize.Width - stringSize.Width)
+                            _currentDirection = ScrollDirection.RightToLeft;
                         else
-                            staticTextPos += scrollPixelDistance;
+                            _staticTextPos += _scrollPixelDistance;
                     }
                     break;
             }
 
             //Calculate the vertical position for the scrolling text				
-            switch (verticleTextPosition)
+            switch (_verticleTextPosition)
             {
                 case VerticleTextPosition.Top:
-                    yPos = 2;
+                    _yPos = 2;
                     break;
                 case VerticleTextPosition.Center:
-                    yPos = (this.ClientSize.Height / 2) - (stringSize.Height / 2);
+// ReSharper disable PossibleLossOfFraction
+                    _yPos = ClientSize.Height / 2 - (stringSize.Height / 2);
+// ReSharper restore PossibleLossOfFraction
                     break;
                 case VerticleTextPosition.Botom:
-                    yPos = this.ClientSize.Height - stringSize.Height;
+                    _yPos = ClientSize.Height - stringSize.Height;
                     break;
             }
         }
@@ -205,32 +208,32 @@ namespace TestAPP
         #region Mouse over, text link logic
         private void EnableTextLink(RectangleF textRect)
         {
-            Point curPt = this.PointToClient(Cursor.Position);
+            Point curPt = PointToClient(Cursor.Position);
 
             //if (curPt.X > textRect.Left && curPt.X < textRect.Right
             //	&& curPt.Y > textRect.Top && curPt.Y < textRect.Bottom)			
             if (textRect.Contains(curPt))
             {
                 //Stop the text of the user mouse's over the text
-                if (stopScrollOnMouseOver)
-                    scrollOn = false;
+                if (_stopScrollOnMouseOver)
+                    _scrollOn = false;
 
-                this.Cursor = Cursors.Hand;
+                Cursor = Cursors.Hand;
             }
             else
             {
                 //Make sure the text is scrolling if user's mouse is not over the text
-                scrollOn = true;
+                _scrollOn = true;
 
-                this.Cursor = Cursors.Default;
+                Cursor = Cursors.Default;
             }
         }
 
-        private void ScrollingText_Click(object sender, System.EventArgs e)
+        private void ScrollingText_Click(object sender, EventArgs e)
         {
             //Trigger the text clicked event if the user clicks while the mouse 
             //is over the text.  This allows the text to act like a hyperlink
-            if (this.Cursor == Cursors.Hand)
+            if (Cursor == Cursors.Hand)
                 OnTextClicked(this, new EventArgs());
         }
 
@@ -256,11 +259,11 @@ namespace TestAPP
         {
             set
             {
-                timer.Interval = value;
+                _timer.Interval = value;
             }
             get
             {
-                return timer.Interval;
+                return _timer.Interval;
             }
         }
 
@@ -273,11 +276,11 @@ namespace TestAPP
         {
             set
             {
-                scrollPixelDistance = value;
+                _scrollPixelDistance = value;
             }
             get
             {
-                return scrollPixelDistance;
+                return _scrollPixelDistance;
             }
         }
 
@@ -290,13 +293,13 @@ namespace TestAPP
         {
             set
             {
-                text = value;
-                this.Invalidate();
-                this.Update();
+                _text = value;
+                Invalidate();
+                Update();
             }
             get
             {
-                return text;
+                return _text;
             }
         }
 
@@ -309,11 +312,11 @@ namespace TestAPP
         {
             set
             {
-                scrollDirection = value;
+                _scrollDirection = value;
             }
             get
             {
-                return scrollDirection;
+                return _scrollDirection;
             }
         }
 
@@ -326,11 +329,11 @@ namespace TestAPP
         {
             set
             {
-                verticleTextPosition = value;
+                _verticleTextPosition = value;
             }
             get
             {
-                return verticleTextPosition;
+                return _verticleTextPosition;
             }
         }
 
@@ -343,11 +346,11 @@ namespace TestAPP
         {
             set
             {
-                showBorder = value;
+                _showBorder = value;
             }
             get
             {
-                return showBorder;
+                return _showBorder;
             }
         }
 
@@ -360,11 +363,11 @@ namespace TestAPP
         {
             set
             {
-                borderColor = value;
+                _borderColor = value;
             }
             get
             {
-                return borderColor;
+                return _borderColor;
             }
         }
 
@@ -377,11 +380,11 @@ namespace TestAPP
         {
             set
             {
-                stopScrollOnMouseOver = value;
+                _stopScrollOnMouseOver = value;
             }
             get
             {
-                return stopScrollOnMouseOver;
+                return _stopScrollOnMouseOver;
             }
         }
 
@@ -394,11 +397,11 @@ namespace TestAPP
         {
             set
             {
-                timer.Enabled = value;
+                _timer.Enabled = value;
             }
             get
             {
-                return timer.Enabled;
+                return _timer.Enabled;
             }
         }
 
@@ -410,11 +413,11 @@ namespace TestAPP
         {
             set
             {
-                foregroundBrush = value;
+                _foregroundBrush = value;
             }
             get
             {
-                return foregroundBrush;
+                return _foregroundBrush;
             }
         }
 
@@ -425,11 +428,11 @@ namespace TestAPP
         {
             set
             {
-                backgroundBrush = value;
+                _backgroundBrush = value;
             }
             get
             {
-                return backgroundBrush;
+                return _backgroundBrush;
             }
         }
         #endregion

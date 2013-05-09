@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.scrollingText1 = new TestAPP.ScrollingText();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.scrollingText1 = new TestAPP.ScrollingText();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -46,6 +46,27 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(808, 29);
             this.panel1.TabIndex = 0;
+            // 
+            // scrollingText1
+            // 
+            this.scrollingText1.BorderColor = System.Drawing.Color.Black;
+            this.scrollingText1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.scrollingText1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.scrollingText1.Font = new System.Drawing.Font("Verdana", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.scrollingText1.ForeColor = System.Drawing.Color.DarkRed;
+            this.scrollingText1.ForegroundBrush = null;
+            this.scrollingText1.Location = new System.Drawing.Point(0, 0);
+            this.scrollingText1.Name = "scrollingText1";
+            this.scrollingText1.ScrollDirection = TestAPP.ScrollDirection.RightToLeft;
+            this.scrollingText1.ScrollText = "Text";
+            this.scrollingText1.ShowBorder = true;
+            this.scrollingText1.Size = new System.Drawing.Size(808, 29);
+            this.scrollingText1.StopScrollOnMouseOver = false;
+            this.scrollingText1.TabIndex = 0;
+            this.scrollingText1.TextScrollDistance = 2;
+            this.scrollingText1.TextScrollEnabled = true;
+            this.scrollingText1.TextScrollSpeed = 25;
+            this.scrollingText1.VerticleTextPosition = TestAPP.VerticleTextPosition.Center;
             // 
             // tableLayoutPanel1
             // 
@@ -80,27 +101,6 @@
             this.panel2.Size = new System.Drawing.Size(564, 499);
             this.panel2.TabIndex = 1;
             // 
-            // scrollingText1
-            // 
-            this.scrollingText1.BorderColor = System.Drawing.Color.Black;
-            this.scrollingText1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.scrollingText1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.scrollingText1.Font = new System.Drawing.Font("Verdana", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.scrollingText1.ForeColor = System.Drawing.Color.DarkRed;
-            this.scrollingText1.ForegroundBrush = null;
-            this.scrollingText1.Location = new System.Drawing.Point(0, 0);
-            this.scrollingText1.Name = "scrollingText1";
-            this.scrollingText1.ScrollDirection = TestAPP.ScrollDirection.RightToLeft;
-            this.scrollingText1.ScrollText = "Text";
-            this.scrollingText1.ShowBorder = true;
-            this.scrollingText1.Size = new System.Drawing.Size(808, 29);
-            this.scrollingText1.StopScrollOnMouseOver = false;
-            this.scrollingText1.TabIndex = 0;
-            this.scrollingText1.TextScrollDistance = 2;
-            this.scrollingText1.TextScrollEnabled = true;
-            this.scrollingText1.TextScrollSpeed = 25;
-            this.scrollingText1.VerticleTextPosition = TestAPP.VerticleTextPosition.Center;
-            // 
             // Test
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -108,6 +108,7 @@
             this.ClientSize = new System.Drawing.Size(808, 534);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.panel1);
+            this.DoubleBuffered = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Test";

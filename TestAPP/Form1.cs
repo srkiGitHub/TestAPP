@@ -14,7 +14,9 @@ namespace TestAPP
         {
             textBox1.Text = "";
             openFileDialog1.FileName = "";
+// ReSharper disable LocalizableElement
             openFileDialog1.Filter = "avi files (*.avi)|*.avi";
+// ReSharper restore LocalizableElement
             openFileDialog1.ShowDialog();
             textBox1.Text = openFileDialog1.FileName;
         }
@@ -31,7 +33,7 @@ namespace TestAPP
         private void buttonTest_Click(object sender, EventArgs e)
         {
             if (!check_tboxes()) return;
-            Test tst = new Test(textBox1.Text, textBox2.Text, textBox3.Text);
+            var tst = new Test(textBox1.Text, textBox2.Text, textBox3.Text);
             tst.ShowDialog();
         }
 
